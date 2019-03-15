@@ -1,10 +1,6 @@
 package ru.iopoz.courseTwo.homework4;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.HeadlessException;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -26,21 +22,22 @@ public class ChatWindow extends JFrame {
         setTitle("Chat Client");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        setLayout(new GridLayout(2, 1));
+        setLayout(new FlowLayout());
         JPanel p1 = new JPanel();
 
-        p1.setBackground(Color.GREEN);
         p1.setLayout(new BoxLayout(p1, BoxLayout.Y_AXIS));
         JTextArea jTextOutputArea = new JTextArea();
+        jTextOutputArea.setPreferredSize( new Dimension( 350, 300 ) );
+        jTextOutputArea.setEditable(false);
         p1.add(new JScrollPane(jTextOutputArea));
-
 
         JPanel p2 = new JPanel();
         p2.setBackground(Color.LIGHT_GRAY);
-        p2.setLayout(new GridLayout(1, 2));
+        p2.setLayout(new FlowLayout());
         JTextField jTextInputField = new JTextField();
+        jTextInputField.setPreferredSize( new Dimension( 200, 24 ) );
         JButton jBtnSend = new JButton("Send");
-        jBtnSend.setBounds(50, 50, 100, 100);
+        jBtnSend.setBounds(50, 50, 50, 50);
 
 
         jTextInputField.addActionListener(e -> {
