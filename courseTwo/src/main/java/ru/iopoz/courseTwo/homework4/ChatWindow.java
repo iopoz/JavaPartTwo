@@ -27,7 +27,7 @@ public class ChatWindow extends JFrame {
 
         p1.setLayout(new BoxLayout(p1, BoxLayout.Y_AXIS));
         JTextArea jTextOutputArea = new JTextArea();
-        jTextOutputArea.setPreferredSize( new Dimension( 350, 300 ) );
+        jTextOutputArea.setPreferredSize(new Dimension(350, 300));
         jTextOutputArea.setEditable(false);
         p1.add(new JScrollPane(jTextOutputArea));
 
@@ -35,7 +35,7 @@ public class ChatWindow extends JFrame {
         p2.setBackground(Color.LIGHT_GRAY);
         p2.setLayout(new FlowLayout());
         JTextField jTextInputField = new JTextField();
-        jTextInputField.setPreferredSize( new Dimension( 200, 24 ) );
+        jTextInputField.setPreferredSize(new Dimension(200, 24));
         JButton jBtnSend = new JButton("Send");
         jBtnSend.setBounds(50, 50, 50, 50);
 
@@ -53,7 +53,6 @@ public class ChatWindow extends JFrame {
         add(p2);
 
 
-
         jBtnSend.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -61,16 +60,6 @@ public class ChatWindow extends JFrame {
                 jTextInputField.setText("");
             }
         });
-//
-//        jbf.addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mousePressed(MouseEvent e) {
-//                System.out.println("you pressed me!");
-//            }
-//        });
-
-        // add(jbf);
-
 
         setVisible(true);
 

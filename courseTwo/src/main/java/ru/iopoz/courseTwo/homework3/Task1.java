@@ -30,28 +30,9 @@ public class Task1 {
                 "sapien dignissim in.";
         List<String> strList = new ArrayList<String>(Arrays.asList(startStr.split(" ")));
 
-        Map<String, Integer> hashMap = new HashMap<>();
-
-        for (String word: strList) {
-            Integer count = (Integer) getWord(strList, word);
-            hashMap.put(word, count);
+        Set<String> unique = new HashSet<String>(strList);
+        for (String key : unique) {
+            System.out.println(key + ": " + Collections.frequency(strList, key));
         }
-
-        for (Map.Entry<String, Integer> entry : hashMap.entrySet()) {
-            System.out.println(entry.getKey() + ": "+ Integer.toString(entry.getValue()));
-        }
-
-
-
-    }
-
-    protected static Integer getWord(List<String> listWords, String word){
-        int count = 1;
-        for (String curWord: listWords) {
-            if (word.toLowerCase().equals(curWord.toLowerCase())){
-                count ++;
-            }
-        }
-        return count;
     }
 }
