@@ -18,6 +18,7 @@ public class ClientApp extends JFrame {
     private JTextField inputTextField;
     private DataOutputStream outputStream;
     private DataInputStream inputStream;
+    private boolean isAuth;
 
     public ClientApp() {
         initGui();
@@ -29,7 +30,13 @@ public class ClientApp extends JFrame {
                 try {
                     String echoMessage = inputStream.readUTF();
                     System.out.println("received message::" + echoMessage);
-                    outputTextArea.append(echoMessage);
+                    if(!echoMessage.equals("authError")){
+                        isAuth = true;
+                        outputTextArea.append(echoMessage);
+                    } else {
+                        isAuth = false;
+                    }
+
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -43,7 +50,7 @@ public class ClientApp extends JFrame {
 
     private void initConnection() {
         try {
-            socket = new Socket("localhost", 8099);
+            socket = new Socket("localhost", 8190);
             outputStream = new DataOutputStream(socket.getOutputStream());
             inputStream = new DataInputStream(socket.getInputStream());
             System.out.println("connection initialized");
@@ -63,7 +70,7 @@ public class ClientApp extends JFrame {
 
     private void sendMessage(String message) {
         try {
-            System.out.println("sent message::" + message);
+            System.out.println("sent message:" + message);
             outputStream.writeUTF(message);
         } catch (IOException e) {
             e.printStackTrace();
@@ -75,7 +82,7 @@ public class ClientApp extends JFrame {
         inputTextField = new JTextField();
 
         setTitle("client.ClientApp");
-        setBounds(500, 200, 700, 700);
+        setBounds(500, 200, 200, 150);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -102,8 +109,6 @@ public class ClientApp extends JFrame {
 
         outputTextArea.setEditable(false);     //чтобы нельзя было печатать текст в поле
         return textPanel;
-
-
     }
 
     private JPanel createButtonPanel() {
@@ -128,22 +133,32 @@ public class ClientApp extends JFrame {
     private JPanel createAuthPanel(JPanel textPanel, JPanel buttonPanel) {
         JPanel authPanel = new JPanel();
         JTextField loginField = new JTextField();
-        loginField.addActionListener(e -> processMessage());
+        JTextField passwordField = new JTextField();
+        JLabel errorState = new JLabel();
+        //loginField.addActionListener(e -> processMessage());
 
         JButton authButton = new JButton("Auth");
         authButton.addActionListener(e -> {
             initConnection();
             initReceiver();
-            sendMessage(loginField.getText());
-            authPanel.setVisible(false);
-            buttonPanel.setVisible(true);
-            textPanel.setVisible(true);
+            sendMessage("auth:" + loginField.getText() + ":" + passwordField.getText());
+            if (isAuth){
+                authPanel.setVisible(false);
+                setBounds(500, 200, 700, 700);
+                buttonPanel.setVisible(true);
+                textPanel.setVisible(true);
+            } else {
+                errorState.setText("Auth problems! Use correct user date");
+            }
+
         });
 
-
+        authPanel.add(errorState);
         authPanel.add(loginField);
+        authPanel.add(passwordField);
         authPanel.add(authButton);
-        authPanel.setLayout(new BoxLayout(authPanel, BoxLayout.X_AXIS));
+        authPanel.setLayout(new BoxLayout(authPanel, BoxLayout.Y_AXIS));
+        //authPanel.setBounds(500, 200, 100, 100);
         authPanel.setVisible(true);
         return authPanel;
     }

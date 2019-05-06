@@ -21,7 +21,7 @@ public class DBConnector {
 
     private Connection connection;
 
-    private DBConnector() throws SQLException{
+    public DBConnector() throws SQLException{
         DriverManager.registerDriver(new JDBC());
         this.connection = DriverManager.getConnection(DB_STR);
     }
@@ -36,34 +36,31 @@ public class DBConnector {
         }
     }
 
-    public boolean isUserExist(String userNick){
+    public int getUserId(String userNick){
         try(Statement statement = this.connection.createStatement()){
-            String sqlStr = "Select * from user where 'user_nick'='" + userNick + "'";
-            return statement.execute(sqlStr);
+            String sqlStr = "Select user_id from user where user_nick='" + userNick + "'";
+            ResultSet resultSet = statement.executeQuery(sqlStr);
+            return resultSet.getInt("user_id");
         } catch (SQLException e){
             e.printStackTrace();
-            return false;
+            return 0;
         }
     }
 
     public boolean isUserAuthorized(String userNick, String userPassword){
         try(Statement statement = this.connection.createStatement()){
-            String sqlStr = "Select * from user where 'user_nick'='" + userNick + "' and 'user_password'='" + userPassword + "'";
-            return statement.execute(sqlStr);
+            String sqlStr = "Select user_id from user where user_nick='" + userNick + "' and user_password='" + userPassword + "'";
+            ResultSet resultSet = statement.executeQuery(sqlStr);
+            return !resultSet.isClosed();
         } catch (SQLException e){
             e.printStackTrace();
             return false;
         }
     }
 
-    public List<String> getAllMessages(String userNick){
+    public List<String> getAllMessages(String userId){
         try(Statement statement = this.connection.createStatement()){
-            ResultSet userResSet = statement.executeQuery("Select user_id from user where 'user_nick'='" + userNick +"'");
-            String userId = "";
-            while (userResSet.next()){
-                 userId = Integer.toString(userResSet.getInt("user_id"));
-            }
-            String sqlStr = "Select t1.msg_text, t1.msg_date, t2.user_nick from messages as t1, user as t2 where t2.user_id=t1.user_from and ('user_to'='" + userId + "' or 'user_to'=0)";
+            String sqlStr = "Select t1.msg_text, t1.msg_date, t2.user_nick from messages as t1, user as t2 where t2.user_id=t1.user_from and (user_to='" + userId + "' or user_to=0)";
 
             ResultSet resultSet = statement.executeQuery(sqlStr);
 
@@ -72,7 +69,7 @@ public class DBConnector {
             while (resultSet.next()){
 
                 msgList.add("from: "+ resultSet.getString("user_nick")+ " at "
-                        + resultSet.getDate("msg_date") + "\t\n"
+                        + resultSet.getString("msg_date") + "\t\n"
                         + resultSet.getString("msg_text"));
             }
             return msgList;
@@ -84,11 +81,11 @@ public class DBConnector {
 
     public void sendMsg(String msgText, String userNickFrom, String userNickTo){
         int userToID=0;
-        int userFromID = 0;
+        int userFromID = Integer.parseInt(userNickFrom);
         ResultSet resultSet;
         if (!userNickTo.isEmpty()) {
             try (Statement statement = this.connection.createStatement()) {
-                String sqlStr = "Select user_id from user where 'user_nick'='" + userNickTo + "'";
+                String sqlStr = "Select user_id from user where user_nick='" + userNickTo + "'";
                 resultSet = statement.executeQuery(sqlStr);
                 while (resultSet.next()) {
                     userToID = resultSet.getInt("user_id");
@@ -98,26 +95,35 @@ public class DBConnector {
             }
         }
 
-        try (Statement statement = this.connection.createStatement()) {
-            String sqlStr = "Select user_id from user where 'user_nick'='" + userNickFrom + "'";
-            resultSet = statement.executeQuery(sqlStr);
-            while (resultSet.next()) {
-                userFromID = resultSet.getInt("user_id");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
         try(PreparedStatement statement = this.connection.prepareStatement(
-                "INSERT INTO Message('msg_text', 'msg_date', 'user_to', 'user_from') VALUES(? ,?, ?, ?)")){
+                "INSERT INTO messages('msg_text', 'msg_date', 'user_to', 'user_from') VALUES(? ,?, ?, ?)")){
             statement.setObject(1, msgText);
-            statement.setObject(2, new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime()));
+            statement.setObject(2, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime()));
             statement.setObject(3, userToID);
             statement.setObject(4, userFromID);
+            statement.execute();
         } catch (SQLException e){
             e.printStackTrace();
         }
 
+    }
+
+    public String getUser(String userId){
+        try(Statement statement = this.connection.createStatement()){
+            String sqlStr = "Select user_nick from user where user_id=" + userId + "";
+
+            ResultSet resultSet = statement.executeQuery(sqlStr);
+
+            String user="";
+
+            while (resultSet.next()){
+                user = resultSet.getString("user_nick");
+            }
+            return user;
+        } catch (SQLException e){
+            e.printStackTrace();
+            return "";
+        }
     }
 
 }
